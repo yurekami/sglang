@@ -110,6 +110,8 @@ class ScheduleBatchDisaggregationDecodeMixin:
         """Assign the buffered last input id to schedule batch"""
         self.output_ids = []
         for req in self.reqs:
+            if not req.output_ids:
+                raise ValueError(f"Request {req.rid} has empty output_ids")
             self.output_ids.append(req.output_ids[-1])
             self.tree_cache.cache_unfinished_req(req)
             if req.grammar is not None:
