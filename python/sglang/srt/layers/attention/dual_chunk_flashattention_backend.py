@@ -305,6 +305,10 @@ class DualChunkFlashAttentionBackend(AttentionBackend):
         # Use precomputed metadata across all layers
         metadata = self.forward_metadata
 
+        if q.shape[-1] % 5 != 0:
+            raise ValueError(
+                f"Query last dimension must be divisible by 5, got {q.shape[-1]}"
+            )
         (
             query,
             query_succ,
@@ -418,6 +422,10 @@ class DualChunkFlashAttentionBackend(AttentionBackend):
         # Use precomputed metadata across all layers
         metadata = self.forward_metadata
 
+        if q.shape[-1] % 5 != 0:
+            raise ValueError(
+                f"Query last dimension must be divisible by 5, got {q.shape[-1]}"
+            )
         (
             query,
             query_succ,
