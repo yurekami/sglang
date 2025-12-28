@@ -94,6 +94,11 @@ class LoRAAdapter(nn.Module):
         ):
             layer_id = get_layer_id(name)
             if layer_id is not None:
+                if layer_id >= len(self.layers):
+                    raise ValueError(
+                        f"Layer ID {layer_id} from weight '{name}' exceeds "
+                        f"number of layers ({len(self.layers)})"
+                    )
                 self.layers[layer_id].weights[name] = loaded_weight.cpu()
             elif "embed_tokens" in name or "lm_head" in name:
                 # Check if this module is declared in target_modules before loading
