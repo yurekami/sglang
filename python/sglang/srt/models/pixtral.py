@@ -190,6 +190,12 @@ class PixtralForConditionalGeneration(nn.Module):
             image_features = self.pre_mm_projector_norm(image_features)
         if self.vision_args.mm_projector_id == PATCH_MERGE:
             patch_size = self.vision_args.patch_size
+            for img in images:
+                if img.shape[-2] % patch_size != 0 or img.shape[-1] % patch_size != 0:
+                    raise ValueError(
+                        f"Image dimensions must be divisible by patch_size ({patch_size}), "
+                        f"got shape {img.shape[-2:]}."
+                    )
             img_patch_dims = [
                 (img.shape[-2] // patch_size, img.shape[-1] // patch_size)
                 for img in images
