@@ -995,7 +995,8 @@ class Req:
 
         if self.grammar is not None:
             if self.grammar.is_terminated():
-                self.finished_reason = FINISH_MATCHED_TOKEN(matched=self.output_ids[-1])
+                matched_token = self.output_ids[-1] if self.output_ids else None
+                self.finished_reason = FINISH_MATCHED_TOKEN(matched=matched_token)
                 return
 
         new_accepted_tokens = self.output_ids[-new_accepted_len:]
