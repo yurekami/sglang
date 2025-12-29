@@ -142,8 +142,20 @@ def process_content_for_template_format(
     Returns:
         Processed message dictionary
     """
-    if not isinstance(msg_dict.get("content"), list):
-        # Already a string or None, no processing needed
+    content = msg_dict.get("content")
+
+    if not isinstance(content, list):
+        # Content is a string or None
+        if content_format == "openai" and isinstance(content, str):
+            # Vision model templates expect structured content format, even for
+            # text-only requests. Convert plain string to OpenAI structured format.
+            # This allows Vision LLMs to accept text-only messages without images.
+            new_msg = {
+                k: v for k, v in msg_dict.items() if v is not None and k != "content"
+            }
+            new_msg["content"] = [{"type": "text", "text": content}]
+            return new_msg
+        # Already a string (for string format) or None, no processing needed
         return {k: v for k, v in msg_dict.items() if v is not None}
 
     if content_format == "openai":

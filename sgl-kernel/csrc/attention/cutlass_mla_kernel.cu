@@ -220,7 +220,10 @@ void cutlass_mla_decode(
     int64_t num_kv_splits) {
   auto sm_version = getSMVersion();
   // On SM103a, half of the accuracy tests are failing.
-  TORCH_CHECK(sm_version == 100, "cutlass_mla_decode is only supported on compute capability 10.0, but found sm version ", sm_version);
+  // SM120 (RTX PRO 6000 Blackwell workstation) is also not validated.
+  TORCH_CHECK(sm_version == 100,
+    "cutlass_mla_decode is only supported on SM100 GPUs (B200/GB200), but found sm version ", sm_version, ". "
+    "For SM120 GPUs (RTX PRO 6000), please use --attention-backend flashinfer instead.");
 
   auto in_dtype = q_nope.dtype();
   at::cuda::CUDAGuard device_guard{(char)q_nope.get_device()};
