@@ -813,6 +813,9 @@ class OpenAIServingChat(OpenAIServingBase):
                     request.tool_choice,
                     history_tool_calls_cnt,
                 )
+                # Enforce parallel_tool_calls=False by keeping only the first tool call
+                if tool_calls and not getattr(request, "parallel_tool_calls", True):
+                    tool_calls = tool_calls[:1]
 
             choice_data = ChatCompletionResponseChoice(
                 index=idx,

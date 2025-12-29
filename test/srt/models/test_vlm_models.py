@@ -1,6 +1,7 @@
 import argparse
 import random
 import sys
+import tempfile
 import unittest
 from types import SimpleNamespace
 
@@ -28,8 +29,10 @@ class TestVLMModels(MMMUVLMMixin, CustomTestCase):
         if is_in_ci():
             models_to_test = [random.choice(MODELS)]
 
-        for model in models_to_test:
-            self._run_vlm_mmmu_test(model, "./logs")
+        # Use a temporary directory to avoid reading cached results from previous runs
+        with tempfile.TemporaryDirectory() as tmpdir:
+            for model in models_to_test:
+                self._run_vlm_mmmu_test(model, tmpdir)
 
 
 if __name__ == "__main__":

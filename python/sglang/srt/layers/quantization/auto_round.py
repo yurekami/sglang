@@ -364,6 +364,8 @@ class AutoRoundConfig(QuantizationConfig):
 
         if isinstance(layer, FusedMoE):
             if use_marlin:
+                return GPTQMarlinMoEMethod(quant_args_marlin)
+            else:
                 from sglang.srt.layers.quantization.moe_wna16 import MoeWNA16Config
 
                 config = {
@@ -376,7 +378,6 @@ class AutoRoundConfig(QuantizationConfig):
                 return MoeWNA16Config.from_config(config).get_quant_method(
                     layer, prefix
                 )
-            return GPTQMarlinMoEMethod(quant_args_marlin)
 
         if isinstance(layer, (LinearBase, ParallelLMHead)):
             if use_marlin:

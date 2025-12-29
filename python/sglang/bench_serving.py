@@ -2179,9 +2179,10 @@ async def benchmark(
     print("{:<40} {:<10.2f}".format("Benchmark duration (s):", benchmark_duration))
     print("{:<40} {:<10}".format("Total input tokens:", metrics.total_input))
     print("{:<40} {:<10}".format("Total input text tokens:", metrics.total_input_text))
-    print(
-        "{:<40} {:<10}".format("Total input vision tokens:", metrics.total_input_vision)
-    )
+    if metrics.total_input_vision > 0:
+        print(
+            "{:<40} {:<10}".format("Total input vision tokens:", metrics.total_input_vision)
+        )
     print("{:<40} {:<10}".format("Total generated tokens:", metrics.total_output))
     print(
         "{:<40} {:<10}".format(
