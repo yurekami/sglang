@@ -1085,6 +1085,19 @@ class ServerArgs:
                         logger.info(
                             "Use trtllm_mla as attention backend on sm100 for DeepseekV3ForCausalLM"
                         )
+                elif is_cuda() and is_sm120_supported():
+                    # SM120 (RTX PRO 6000 Blackwell workstation) is not supported by cutlass_mla,
+                    # so we fall back to flashinfer which works on SM120.
+                    if (
+                        self.attention_backend is None
+                        and self.prefill_attention_backend is None
+                        and self.decode_attention_backend is None
+                    ):
+                        self.attention_backend = "flashinfer"
+                        logger.info(
+                            "Use flashinfer as attention backend on SM120 for DeepseekV3ForCausalLM "
+                            "(cutlass_mla/trtllm_mla not supported on SM120)"
+                        )
 
             # common to all Deepseek MoE models
             if is_cuda() and is_sm100_supported():
@@ -1447,6 +1460,13 @@ class ServerArgs:
             self.attention_backend == "cutlass_mla"
             or self.decode_attention_backend == "cutlass_mla"
         ):
+            # Note: cutlass_mla_decode kernel only supports SM100.
+            # SM120 (RTX PRO 6000 Blackwell) is not supported due to CUTLASS kernel limitations.
+            if not is_sm100_supported():
+                raise ValueError(
+                    "Cutlass MLA backend is only supported on SM100 GPUs (B200/GB200). "
+                    "SM120 GPUs (RTX PRO 6000) are not supported. Please use --attention-backend flashinfer instead."
+                )
             logger.warning(
                 "Cutlass MLA only supports a page_size of 128, change page_size to 128."
             )
@@ -1456,9 +1476,12 @@ class ServerArgs:
             self.attention_backend == "trtllm_mla"
             or self.decode_attention_backend == "trtllm_mla"
         ):
-            if not is_blackwell_supported():
+            # Note: trtllm_mla uses cutlass_mla_decode which only supports SM100.
+            # SM120 (RTX PRO 6000 Blackwell) is not supported due to CUTLASS kernel limitations.
+            if not is_sm100_supported():
                 raise ValueError(
-                    "TRTLLM MLA backend is only supported on Blackwell GPUs (SM100). Please use a different backend."
+                    "TRTLLM MLA backend is only supported on SM100 GPUs (B200/GB200). "
+                    "SM120 GPUs (RTX PRO 6000) are not supported. Please use --attention-backend flashinfer instead."
                 )
 
             if self.page_size not in [32, 64]:
